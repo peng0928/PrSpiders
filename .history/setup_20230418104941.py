@@ -2,10 +2,9 @@
 # -*- coding:utf-8 -*-
 from __future__ import print_function
 from setuptools import setup, find_packages
+__version__ = '0.3.1'
 
-__version__ = "0.3.2"
-
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.md", "r", encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(

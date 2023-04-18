@@ -1,6 +1,6 @@
 # encoding:utf-8
 
-__version__ = "v.0.3.2"
+__version__ = "v.0.3.1"
 
 import argparse
 
