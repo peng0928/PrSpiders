@@ -1,11 +1,9 @@
-from requests.exceptions import SSLError
 import requests
 import time
 import json
 from requests.models import Response
 from .useragent import get_ua
 from .pxpath import Xpath
-import datetime
 
 """
 -------------------------------------------------
@@ -43,18 +41,18 @@ class prequest(Xpath):
         return {"user-agent": self.user_agent}
 
     def get(
-        self,
-        url,
-        headers=None,
-        retry_time=3,
-        method="GET",
-        meta=None,
-        encoding="utf-8",
-        retry_interval=1,
-        timeout=3,
-        settion=None,
-        *args,
-        **kwargs,
+            self,
+            url,
+            headers=None,
+            retry_time=3,
+            method="GET",
+            meta=None,
+            encoding="utf-8",
+            retry_interval=1,
+            timeout=3,
+            settion=None,
+            *args,
+            **kwargs,
     ):
         """
         get method
@@ -90,13 +88,13 @@ class prequest(Xpath):
                 if self.response.ok:
                     return self
                 else:
-                    raise Exception(f"Response.ok is False")
+                    raise Exception(f"Requests False %s" % self.code)
 
             except Exception as e:
                 retry_time -= 1
                 self.retry_num += 1
                 if retry_time < 0 or settion.retry is False:
-                    self.log.error("[Retry Fasle] %s [Error] %s" % (url, e))
+                    self.log.error("\033[31m[Retry Fasle] %s %s %s\033[0m" % (self.method, url, e))
                     self.response.status_code = (
                         410
                         if not self.response.status_code
@@ -106,8 +104,8 @@ class prequest(Xpath):
                     return self
                 else:
                     self.log.info(
-                        "[Retry] %s [Error] %s [Interval] %ss"
-                        % (url, e, retry_interval)
+                        "\033[31m[Retry] %s %s %s %ss\033[0m"
+                        % (url, self.method, e, retry_interval)
                     )
 
                 time.sleep(retry_interval)

@@ -3,7 +3,9 @@ README.md
 setup.py
 PrSpider/PrSpiders.py
 PrSpider/__init__.py
+PrSpider/log.py
 PrSpider/pxpath.py
+PrSpider/pyconn.py
 PrSpider/requestXpath.py
 PrSpider/useragent.py
 PrSpiders.egg-info/PKG-INFO

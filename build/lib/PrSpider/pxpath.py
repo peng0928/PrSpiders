@@ -3,7 +3,7 @@ import re, time, copy
 from lxml import etree
 from datetime import timedelta, datetime
 import unicodedata
-from .PrSpiders import logging
+from PrSpider.PrSpiders import loguer
 
 
 class Xpath(object):
@@ -133,7 +133,7 @@ class prxpath:
         :return:  返回解析文本的字符串或者列表
         """
         text_xpath = ".//text()"
-        if "text()" in self._expr:
+        if "/text()" in self._expr:
             return self.xp
         warps = "\n" * warps
         if isinstance(self.xp, list):
@@ -193,13 +193,13 @@ class Process_Date:
             result = self.parse_time(data)
             return result
         except Exception as e:
-            logging.error(e)
+            loguer.error('@Date时间处理错误 | [%s] | %s' % (data, e))
             return None
 
     @classmethod
     def repl_date(self, l: list):
         if len(l) > 1:
-            raise ValueError("匹配时间数量超过一个")
+            raise ValueError("匹配时间数量超过一个 <str>%s</str>" % l)
         res = "".join(l).strip()
         res = re.sub("年|月|/", "-", res)
         res = re.sub("日|秒", "", res)
@@ -235,7 +235,10 @@ class Process_Date:
 
         # 昨天 18:03
         elif "昨天" in s_time:
-            last_time = re.findall(r".*?(\d{1,2}:\d{1,2})", s_time)[0]
+            try:
+                last_time = re.findall(r".*?(\d{1,2}:\d{1,2})", s_time)[0]
+            except:
+                last_time = '00:00'
             days_ago = datetime.now() - timedelta(days=int(1))
             y_m_d = (
                     str(days_ago.year) + "-" + str(days_ago.month) + "-" + str(days_ago.day)
@@ -246,7 +249,10 @@ class Process_Date:
             )
 
         elif "前天" in s_time:
-            last_time = re.findall(r".*?(\d{1,2}:\d{1,2})", s_time)[0]
+            try:
+                last_time = re.findall(r".*?(\d{1,2}:\d{1,2})", s_time)[0]
+            except:
+                last_time = '00:00'
             days_ago = datetime.now() - timedelta(days=int(2))
             y_m_d = (
                     str(days_ago.year) + "-" + str(days_ago.month) + "-" + str(days_ago.day)
