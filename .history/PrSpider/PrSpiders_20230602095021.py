@@ -281,3 +281,4 @@ class PrSpiders(settions):
             average_time,
         )
         loguer.opt(colors=True).info(m)
+        self.executor.shutdown(wait=True)

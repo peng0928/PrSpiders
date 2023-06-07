@@ -4,7 +4,7 @@ import json
 from requests.models import Response
 from .useragent import get_ua
 from .pxpath import Xpath
-
+from .log import loguercor
 """
 -------------------------------------------------
    File Name:     prequest
@@ -20,9 +20,8 @@ __author__ = "penr"
 
 
 class prequest(Xpath):
-    def __init__(self, log):
+    def __init__(self):
         self.response = Response()
-        self.log = log
         self.retry_num = 0
         self.start_time = time.time()
 
@@ -88,13 +87,13 @@ class prequest(Xpath):
                 if self.response.ok:
                     return self
                 else:
-                    raise Exception(f"Requests False %s" % self.code)
+                    raise Exception(f"Crawl False %s" % self.code)
 
             except Exception as e:
                 retry_time -= 1
                 self.retry_num += 1
                 if retry_time < 0 or settion.retry is False:
-                    self.log.error("\033[31m[Retry Fasle] %s %s %s\033[0m" % (self.method, url, e))
+                    loguercor.error("<yellow>[Crawl Fasle] %s %s %s</yellow>" % (self.method, url, e))
                     self.response.status_code = (
                         410
                         if not self.response.status_code
@@ -103,8 +102,8 @@ class prequest(Xpath):
                     self.meta_["retry_num"] = self.retry_num
                     return self
                 else:
-                    self.log.info(
-                        "\033[31m[Retry] %s %s %s %ss\033[0m"
+                    loguercor.info(
+                        "<red>[Retry] %s %s %s %ss</red>"
                         % (url, self.method, e, retry_interval)
                     )
 

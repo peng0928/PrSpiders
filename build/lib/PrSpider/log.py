@@ -19,8 +19,8 @@ class Log():
             "error": ['Start', 'Print', 'ERROR', 'CRITICAL', ],
             "success": ['Start', 'Print', 'Crawl', 'CRITICAL', ],
             "warn": ['Start', 'Print', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL'],
-            "info": ['Start', 'Print', 'SUCCESS', 'Crawl', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-            "debug": ['Start', 'Print', 'SUCCESS', 'Crawl', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+            "info": ['Close', 'Start', 'Print', 'SUCCESS', 'Crawl', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+            "debug": ['Close', 'Start', 'Print', 'SUCCESS', 'Crawl', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
         }
         self.log_stdout, self.log_level, self.log_file = log_stdout, log_level, log_file
         loguer.level("DEBUG", color="<green>")
@@ -32,6 +32,7 @@ class Log():
         loguer.level("Print", no=30, color="<green>")
         loguer.level("Crawl", no=40, color="<green>")
         loguer.level("Start", no=50, color="<yellow>")
+        loguer.level("Close", no=50, color="<yellow>")
 
     def loggering(self):
         levels = self.level_dict.get(self.log_level.lower())

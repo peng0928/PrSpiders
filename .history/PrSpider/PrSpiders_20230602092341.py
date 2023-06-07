@@ -185,7 +185,7 @@ class PrSpiders(settions):
                 worker_exception = future.exception()
                 cls.futures.remove(future) if future in cls.futures else cls.futures
                 if worker_exception:
-                    loguercor.error(f"<red>[PrSpider Exception] %s</red>" % worker_exception)
+                    loguercor.error(f"<red>[PrSpider Exception] %s<red>" % worker_exception)
 
     @classmethod
     def fetch(
@@ -281,3 +281,4 @@ class PrSpiders(settions):
             average_time,
         )
         loguer.opt(colors=True).info(m)
+        self.executor.shutdown(wait=True)

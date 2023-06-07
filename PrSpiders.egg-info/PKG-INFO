@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: PrSpiders
-Version: 0.5.2.3
+Version: 0.5.2.4
 Summary: Inherit the requests module, add xpath functionality to expand the API, and handle request failures and retries
 Home-page: https://github.com/peng0928/prequests
 Author: penr

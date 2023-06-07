@@ -1,12 +1,13 @@
+from requests.exceptions import SSLError
+import requests
+import logging
 import time
 import json
-import sys
-import datetime
-import requests
-from requests.exceptions import SSLError
 from requests.models import Response
 from .useragent import get_ua
 from .pxpath import Xpath
+import datetime
+
 """
 -------------------------------------------------
    File Name:     prequest
@@ -20,16 +21,8 @@ from .pxpath import Xpath
 """
 __author__ = 'penr'
 __version__ = 0.1
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 
-from loguru import logger
-
-format = "<b><green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green></b><b><level> | {level: ^8} | </level></b><b><i>{message}</i></b>"
-stdout_handler = {
-    "sink": sys.stdout,
-    "colorize": True,
-    "format": format
-}
-logger.configure(handlers=[stdout_handler])
 
 class prequest(Xpath):
     def __init__(self):
@@ -64,8 +57,8 @@ class prequest(Xpath):
         :param timeout: network timeout default: 3
         :return:
         """
+        self.current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         header = self.header
-        method = method.upper()
         self.method = method
         self.retry_time = retry_time
         self.retry_interval = retry_interval
@@ -79,12 +72,12 @@ class prequest(Xpath):
                 self.response.encoding = encoding
                 if self.response.status_code == 200:
                     self.samount += 1
-                    logger.info(
-                        f'{method} {self.response.status_code} {self.response.url}')
+                    logging.info(
+                        f'{self.current_time} [Spider] True [Method] {method} [Num] {self.amount} [Status] {self.response.status_code} [Url]: {self.response.url}')
                     return self
                 else:
-                    logger.error(
-                        f'{method} {self.response.status_code} {self.response.url}')
+                    logging.error(
+                        f'{self.current_time} [Spider] False [Method] {self.method} [Num] {self.amount} [Status] {self.response.status_code} [Url]: {self.response.url}')
                     raise Exception(f'Respider {self.retry_interval}s')
             except SSLError as e:
                 self.famount += 1
@@ -92,7 +85,7 @@ class prequest(Xpath):
                 return self
             except Exception as e:
                 self.famount += 1
-                logger.error(e)
+                logging.error(e)
                 retry_time -= 1
                 if retry_time <= 0:
                     return None
@@ -143,4 +136,4 @@ Success Requests: %s
 False Requests: %s
 Requests Time: %s
         """ % (self.amount, self.samount, self.famount, spend_time)
-        logger.info(msg)
+        logging.info(msg)
