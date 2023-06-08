@@ -5,6 +5,7 @@ from requests.models import Response
 from .useragent import get_ua
 from .pxpath import Xpath
 from .log import loguercor
+
 """
 -------------------------------------------------
    File Name:     prequest
@@ -85,6 +86,12 @@ class prequest(Xpath):
                 )
                 self.response.encoding = encoding
                 if self.response.ok:
+                    if settion.retry_xpath:
+                        retry_xpath = settion.retry_xpath
+                        xpath_check = self.xpath(retry_xpath).getall()
+                        if not xpath_check:
+                            raise Exception(f"Crawl Xpath False %s" % self.code)
+
                     return self
                 else:
                     raise Exception(f"Crawl False %s" % self.code)

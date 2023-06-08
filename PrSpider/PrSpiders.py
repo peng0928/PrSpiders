@@ -18,6 +18,7 @@ class settions(object):
     start_urls: Optional[list] = None  # 默认请求起始url
     executor: Optional[object] = None  # 线程池处理器
     retry: Optional[bool] = True  # 重试开关，默认开启
+    retry_xpath: Optional[str] = None  # 重试开关，默认开启
     pid: Optional[int] = os.getppid()  # 程序进程id
     start_time: Optional[int] = time.time()  # 开始时间
     download_delay: Optional[int] = 0  # 请求下载周期 默认 0s
@@ -40,6 +41,7 @@ class PrSpiders(settions):
         settions.success_num = self.success_num
         settions.false_num = self.false_num
         settions.retry = self.retry
+        settions.retry_xpath = self.retry_xpath
         settions.futures = self.futures
         settions.workers = self.workers
         settions.download_delay = self.download_delay
