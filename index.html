@@ -1,10 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quasar Demo with Vue 3</title>
+  <!-- 引入Quasar的CSS样式表 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quasar/dist/quasar.min.css">
+</head>
+
+<body>
+  <div id="app">
+    <q-btn
+      color="primary"
+      label="Click me!"
+      @click="handleClick" 
+    ></q-btn>
+  </div>
+
+  <!-- 引入Vue 3的JavaScript脚本 -->
+<!-- 引入Vue 3的JavaScript脚本 -->
+<script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
+  <!-- 引入Quasar的JavaScript脚本 -->
+  <script src="https://cdn.jsdelivr.net/npm/quasar/dist/quasar.umd.min.js"></script>
+
+  <script>
+    const app = Vue.createApp({
+      methods: {
+        handleClick() {
+          alert('Button clicked!');
+        }
+      }
+    });
+
+    app.use(Quasar);
+    app.mount('#app');
+  </script>
 </body>
+
 </html>
