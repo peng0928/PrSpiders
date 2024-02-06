@@ -1,41 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <!--
+    WARNING! Make sure that you match all Quasar related
+    tags to the same version! (Below it's "@2.14.3")
+  -->
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quasar Demo with Vue 3</title>
-  <!-- 引入Quasar的CSS样式表 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quasar/dist/quasar.min.css">
-</head>
+  <head>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons|Material+Icons+Outlined|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+      type="text/css"
+    />
 
-<body>
-  <div id="app">
-    <q-btn
-      color="primary"
-      label="Click me!"
-      @click="handleClick" 
-    ></q-btn>
-  </div>
+    <link
+      href="https://cdn.jsdelivr.net/npm/quasar@2.14.3/dist/quasar.rtl.prod.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
 
-  <!-- 引入Vue 3的JavaScript脚本 -->
-<!-- 引入Vue 3的JavaScript脚本 -->
-<script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
-  <!-- 引入Quasar的JavaScript脚本 -->
-  <script src="https://cdn.jsdelivr.net/npm/quasar/dist/quasar.umd.min.js"></script>
+  <body>
+    <!-- example of injection point where you write your app template -->
+    <div id="q-app">
+      <q-layout view="hHh lpR lFf">
+        <q-header elevated class="bg-primary text-white" height-hint="98">
+          <q-toolbar>
+            <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+            <q-toolbar-title>
+              <q-avatar>
+                <img
+                  src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg"
+                />
+              </q-avatar>
+              PrSpiders
+            </q-toolbar-title>
+          </q-toolbar>
+        </q-header>
 
-  <script>
-    const app = Vue.createApp({
-      methods: {
-        handleClick() {
-          alert('Button clicked!');
-        }
-      }
-    });
+        <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
+          1
+        </q-drawer>
 
-    app.use(Quasar);
-    app.mount('#app');
-  </script>
-</body>
+        <q-page-container>
+          <h1
+            data-line="1"
+            id="*[PrSpiders线程池爬虫框架](https://github.com/peng0928/PrSpiders)*"
+          >
+            <em
+              ><a href="https://github.com/peng0928/PrSpiders"
+                >PrSpiders线程池爬虫框架</a
+              ></em
+            >
+          </h1>
+          <h2 data-line="5" id="*PrSpiders安装*"><em>PrSpiders安装</em></h2>
+          <pre
+            data-line="9"
+          ><code class="language-python" language=python><span class="code-block">pip install PrSpiders</span></code></pre>
+          <h2 data-line="16" id="*开始 Go start!*"><em>开始 Go start!</em></h2>
+          <p data-line="20"><strong>1.Demo</strong></p>
+          <pre
+            data-line="26"
+          ><code class="language-python" language=python><span class="code-block"><span class="hljs-keyword">from</span> PrSpider <span class="hljs-keyword">import</span> PrSpiders <span class="hljs-keyword">class</span> <span class="hljs-title class_">Spider</span>(<span class="hljs-title class_ inherited__">PrSpiders</span>): start_urls = <span class="hljs-string">&#x27;https://www.runoob.com&#x27;</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">self, response</span>): <span class="hljs-comment"># print(response.text) </span> <span class="hljs-built_in">print</span>(response, response.code, response.url) <span class="hljs-comment">#&lt;Response Code=200 Len=323273&gt; 200 https://www.runoob.com/</span> <span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>: Spider()</span></code></pre>
+          <p data-line="45"><strong>2.重写入口函数-start_requests</strong></p>
+          <blockquote data-line="49">
+            <p>
+              start_requests是框架的启动入口，PrSpiders.Requests是发送请求的发送，参数下面会列举。
+            </p>
+          </blockquote>
+          <pre
+            data-line="53"
+          ><code class="language-python" language=python><span class="code-block"><span class="hljs-keyword">from</span> PrSpider <span class="hljs-keyword">import</span> PrSpiders <span class="hljs-keyword">class</span> <span class="hljs-title class_">Spider</span>(<span class="hljs-title class_ inherited__">PrSpiders</span>): <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_requests</span>(<span class="hljs-params">self, **kwargs</span>): start_urls = <span class="hljs-string">&#x27;https://www.runoob.com&#x27;</span> PrSpiders.Requests(url=start_urls, callback=self.parse) <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">self, response</span>): <span class="hljs-comment"># print(response.text) </span> <span class="hljs-built_in">print</span>(response, response.code, response.url) <span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>: Spider()</span></code></pre>
+          <p data-line="75"><strong>3.PrSpiders基本配置</strong></p>
+          <blockquote data-line="79">
+            <p>底层使用ThreadPoolExecutor</p>
+          </blockquote>
+          <pre><code>workers: 线程池 retry: 是否开启请求失败重试，默认开启 download_delay: 请求周期，默认0s download_num: 每次线程请求数量，默认1秒5个请求 logger: 日志保存本地，默认False，开启Ture OR str（文件名），如 logger='test' log_level: 日志等级,默认Info,等级(debug, info, warn, error) log_stdout: 日志存储是否重定向，默认关闭 </code></pre>
+          <blockquote data-line="93"><p>使用方法如下</p></blockquote>
+          <pre
+            data-line="97"
+          ><code class="language-python" language=python><span class="code-block"><span class="hljs-keyword">from</span> PrSpider <span class="hljs-keyword">import</span> PrSpiders <span class="hljs-keyword">class</span> <span class="hljs-title class_">Spider</span>(<span class="hljs-title class_ inherited__">PrSpiders</span>): retry = <span class="hljs-literal">False</span> download_delay = <span class="hljs-number">3</span> download_num = <span class="hljs-number">10</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_requests</span>(<span class="hljs-params">self, **kwargs</span>): start_urls = [<span class="hljs-string">&#x27;https://www.runoob.com&#x27;</span> <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">100</span>)] PrSpiders.Requests(url=start_urls, callback=self.parse) <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">self, response</span>): <span class="hljs-comment"># print(response.text) </span> <span class="hljs-built_in">print</span>(response, response.code, response.url) <span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>: Spider()</span></code></pre>
+          <p data-line="122"><strong>4.PrSpiders.Requests基本配置</strong></p>
+          <blockquote data-line="123">
+            <p>
+              基本参数：<br />
+              url：请求网址<br />
+              callback：回调函数<br />
+              headers：请求头<br />
+              retry_time：请求失败重试次数<br />
+              method：请求方式（默认Get方法），<br />
+              meta：回调参数传递<br />
+              encoding：编码格式（默认utf-8）<br />
+              retry_interval：重试间隔<br />
+              timeout：请求超时时间（默认10s）<br />
+              data or params: 请求参数<br />
+              **kwargs：继承requests的参数如（data, params, proxies）
+            </p>
+          </blockquote>
+          <pre
+            data-line="138"
+          ><code class="language-python" language=python><span class="code-block">PrSpiders.Requests(url=start_urls, headers={}, method=<span class="hljs-string">&#x27;post&#x27;</span>, encoding=<span class="hljs-string">&#x27;gbk&#x27;</span>, callback=self.parse, retry_time=<span class="hljs-number">10</span>, retry_interval=<span class="hljs-number">0.5</span>, meta={<span class="hljs-string">&#x27;hhh&#x27;</span>: <span class="hljs-string">&#x27;ggg&#x27;</span>})</span></code></pre>
+          <h2 data-line="143" id="*Api*"><em>Api</em></h2>
+          <p data-line="147"><strong>GET Status Code</strong></p>
+          <pre><code>response.code </code></pre>
+          <p data-line="155"><strong>GET Text</strong></p>
+          <pre><code>response.text </code></pre>
+          <p data-line="162"><strong>GET Content</strong></p>
+          <pre><code>response.content </code></pre>
+          <p data-line="168"><strong>GET Url</strong></p>
+          <pre><code>response.url </code></pre>
+          <p data-line="176"><strong>GET History</strong></p>
+          <pre><code>response.history </code></pre>
+          <p data-line="184"><strong>GET Headers</strong></p>
+          <pre><code>response.headers </code></pre>
+          <p data-line="192"><strong>GET Text Length</strong></p>
+          <pre><code>response.len </code></pre>
+          <p data-line="200"><strong>GET Lxml Xpath</strong></p>
+          <pre><code>response.xpath </code></pre>
+          <h2 data-line="208" id="*Xpath Api*"><em>Xpath Api</em></h2>
+          <ol data-line="210">
+            <li>text()方法:将xpath结果转成text</li>
+            <li>date()方法:将xpath结果转成date</li>
+            <li>get()方法:将xpath结果提取</li>
+            <li>
+              getall()方法:将xpath结果全部提取，拥有text()方法和date()方法
+            </li>
+          </ol>
+          <pre
+            data-line="215"
+          ><code class="language-python" language=python><span class="code-block"><span class="hljs-keyword">from</span> PrSpider <span class="hljs-keyword">import</span> PrSpiders <span class="hljs-keyword">class</span> <span class="hljs-title class_">Spider</span>(<span class="hljs-title class_ inherited__">PrSpiders</span>): log_level = <span class="hljs-string">&#x27;info&#x27;</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">start_requests</span>(<span class="hljs-params">self, **kwargs</span>): start_urls = <span class="hljs-string">&quot;https://blog.csdn.net/nav/python&quot;</span> PrSpiders.Requests(url=start_urls, callback=self.parse) <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">self, response</span>): lisqueryall = response.xpath(<span class="hljs-string">&quot;//div[@class=&#x27;content&#x27;]&quot;</span>).getall() <span class="hljs-keyword">for</span> query <span class="hljs-keyword">in</span> lisqueryall: title = query.xpath(<span class="hljs-string">&quot;.//span[@class=&#x27;blog-text&#x27;]&quot;</span>).text(lists=<span class="hljs-literal">True</span>) lishref = query.xpath(<span class="hljs-string">&quot;.//a[@class=&#x27;blog&#x27;]/@href&quot;</span>).get() <span class="hljs-built_in">print</span>({ <span class="hljs-string">&#x27;写法&#x27;</span>: <span class="hljs-string">&#x27;第一种&#x27;</span>, <span class="hljs-string">&#x27;列表标题&#x27;</span>: title, <span class="hljs-string">&#x27;列表链接&#x27;</span>: lishref }) title = response.xpath(<span class="hljs-string">&quot;//span[@class=&#x27;blog-text&#x27;]&quot;</span>).text() lisquery = response.xpath(<span class="hljs-string">&quot;//div[@class=&#x27;content&#x27;]/a[@class=&#x27;blog&#x27;]/@href&quot;</span>).get() <span class="hljs-built_in">print</span>({ <span class="hljs-string">&#x27;写法&#x27;</span>: <span class="hljs-string">&#x27;第二种&#x27;</span>, <span class="hljs-string">&#x27;列表标题&#x27;</span>: title, <span class="hljs-string">&#x27;列表链接&#x27;</span>: lisquery }) PrSpiders.Requests(url=lisquery, callback=self.cparse) <span class="hljs-keyword">def</span> <span class="hljs-title function_">cparse</span>(<span class="hljs-params">self, response</span>): title = response.xpath(<span class="hljs-string">&quot;//h1[@id=&#x27;articleContentId&#x27;]&quot;</span>).text() pudate = response.xpath(<span class="hljs-string">&quot;//span[@class=&#x27;time&#x27;]&quot;</span>).date() content = response.xpath(<span class="hljs-string">&quot;//div[@id=&#x27;content_views&#x27;]&quot;</span>).text() <span class="hljs-built_in">print</span>({ <span class="hljs-string">&#x27;标题&#x27;</span>: title, <span class="hljs-string">&#x27;时间&#x27;</span>: <span class="hljs-built_in">str</span>(pudate), <span class="hljs-string">&#x27;href&#x27;</span>: response.url, }) <span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>: Spider()</span></code></pre>
+          <h2 data-line="265" id="*Please contact me if there are any bugs*">
+            <em>Please contact me if there are any bugs</em>
+          </h2>
+          <blockquote data-line="270"><p>email -&gt;</p></blockquote>
+          <blockquote data-line="272"><p>1944542244@qq.com</p></blockquote>
+        </q-page-container>
+      </q-layout>
+    </div>
 
+    <!-- Add the following at the end of your body tag -->
+    <script src="https://unpkg.com/vue@3.2.36/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@2.14.3/dist/quasar.umd.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@2.14.3/dist/lang/en-GB.umd.prod.js"></script>
+
+    <script>
+      const { ref } = Vue; // 添加这行
+      const app = Vue.createApp({
+        setup() {
+          const leftDrawerOpen = ref(false);
+          const title = "欢迎来到PrSpiders线程池爬虫框架介绍";
+          const sections = [
+            {
+              id: "section1",
+              title: "第一节",
+              content: "<p>这是第一节的内容。</p>",
+            },
+            {
+              id: "section2",
+              title: "第二节",
+              content: "<p>这是第二节的内容。</p>",
+            },
+            {
+              id: "section3",
+              title: "第三节",
+              content: "<p>这是第三节的内容。</p>",
+            },
+          ];
+          return {
+            sections,
+            title,
+            leftDrawerOpen,
+            toggleLeftDrawer() {
+              leftDrawerOpen.value = !leftDrawerOpen.value;
+            },
+          };
+        },
+      });
+
+      app.use(Quasar, {
+        config: {},
+      });
+      Quasar.lang.set(Quasar.lang.enGB);
+      app.mount("#q-app");
+    </script>
+  </body>
 </html>
