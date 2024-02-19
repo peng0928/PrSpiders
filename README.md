@@ -1,4 +1,4 @@
-# _[PrSpiders 线程池爬虫框架](https://github.com/peng0928/PrSpiders)_
+# PrSpiders 线程池爬虫框架
 
 ## _开始_
 
@@ -208,4 +208,4 @@ if __name__ == "__main__":
 
 ## 常见问题
 
-### [遇到问题,请提到 issues](https://github.com/peng0928/PrSpiders/issues)
+### 遇到问题,请提到 issues
