@@ -1,10 +1,10 @@
-## _开始_
+## 开始
 
 ### 介绍
 
 1. PrSpiders 是一个多线程爬虫，依赖稳定的 requests 爬虫模块，极大的提高了采集速度，拥有耦合性，后续会拓展更多稳定功能。
 
-### _安装_
+### 安装
 
 ```python
 pip install PrSpiders
@@ -117,7 +117,7 @@ if __name__ == '__main__':
    PrSpiders.Requests(url=start_urls, headers={}, method='post', encoding='gbk', callback=self.parse,  retry_time=10, retry_interval=0.5, meta={'hhh': 'ggg'})
 ```
 
-## _Api_
+## Api
 
 **GET Status Code**
 
@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     response.xpath
 
-## _Xpath Api_
+## Xpath Api
 
 1.  text()方法:将 xpath 结果转成 text
 2.  date()方法:将 xpath 结果转成 date
