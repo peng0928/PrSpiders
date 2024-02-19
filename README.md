@@ -38,7 +38,7 @@ if __name__ == '__main__':
     Spider()
 ```
 
-### **2.重写入口函数-start_requests**
+### **重写入口函数-start_requests**
 
 > start_requests 是框架的启动入口，PrSpiders.Requests 是发送请求的发送，参数下面会列举。
 
