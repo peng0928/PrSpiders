@@ -1,85 +1,70 @@
+# _[PrSpiders 线程池爬虫框架](https://github.com/peng0928/PrSpiders)_
 
-# *[PrSpiders线程池爬虫框架](https://github.com/peng0928/PrSpiders)*
+## _开始_
 
+### 介绍
 
+1. PrSpiders 是一个多线程爬虫，依赖稳定的 requests 爬虫模块，极大的提高了采集速度，拥有耦合性，后续会拓展更多稳定功能。
 
-## *PrSpiders安装*
-
-
+### _安装_
 
 ```python
- pip install PrSpiders
+pip install PrSpiders
+国内镜像:
+pip install PrSpiders -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
+### 架构流程图
 
+![](./img/22bf5e14dcf25beb8f0047e58616ef20.png)
 
-
-## *开始  Go start!*
-
-
-
-**1.Demo**
-
-   
-
-
+### **Demo**
 
 ```python
-from PrSpider import PrSpiders  
+from PrSpider import PrSpiders
 
-class Spider(PrSpiders):  
+class Spider(PrSpiders):
 
-    start_urls = 'https://www.runoob.com'  
+    start_urls = 'https://www.runoob.com'
 
-    def parse(self, response):  
-        # print(response.text)  
-        print(response, response.code, response.url)  
+    def parse(self, response):
+        # print(response.text)
+        print(response, response.code, response.url)
 
   #<Response Code=200 Len=323273> 200 https://www.runoob.com/
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
 
     Spider()
 ```
-       
 
-**2.重写入口函数-start_requests**
+### **2.重写入口函数-start_requests**
 
-
-
-> start_requests是框架的启动入口，PrSpiders.Requests是发送请求的发送，参数下面会列举。
-
-
+> start_requests 是框架的启动入口，PrSpiders.Requests 是发送请求的发送，参数下面会列举。
 
 ```python
-from PrSpider import PrSpiders  
- 
-
-class Spider(PrSpiders):  
-
-    def start_requests(self, **kwargs):  
-        start_urls = 'https://www.runoob.com'  
-        PrSpiders.Requests(url=start_urls, callback=self.parse)  
-
-    def parse(self, response):  
-        # print(response.text)  
-        print(response, response.code, response.url)  
+from PrSpider import PrSpiders
 
 
-if __name__ == '__main__':  
+class Spider(PrSpiders):
+
+    def start_requests(self, **kwargs):
+        start_urls = 'https://www.runoob.com'
+        PrSpiders.Requests(url=start_urls, callback=self.parse)
+
+    def parse(self, response):
+        # print(response.text)
+        print(response, response.code, response.url)
+
+
+if __name__ == '__main__':
 
     Spider()
 ```
 
+**3.PrSpiders 基本配置**
 
-
-**3.PrSpiders基本配置**
-
-
-
-> 底层使用ThreadPoolExecutor
-
-
+> 底层使用 ThreadPoolExecutor
 
     workers: 线程池
     retry: 是否开启请求失败重试，默认开启
@@ -89,129 +74,91 @@ if __name__ == '__main__':
     log_level: 日志等级,默认Info,等级(debug, info, warn, error)
     log_stdout: 日志存储是否重定向，默认关闭
 
-
-
 > 使用方法如下
 
-
-
 ```python
-from PrSpider import PrSpiders  
- 
-
-class Spider(PrSpiders):  
-
-  retry = False  
-  download_delay = 3  
-  download_num = 10  
-
-  def start_requests(self, **kwargs):  
-        start_urls = ['https://www.runoob.com' for i in range(100)]  
-        PrSpiders.Requests(url=start_urls, callback=self.parse)  
-
-  def parse(self, response):  
-        # print(response.text)  
-        print(response, response.code, response.url)  
+from PrSpider import PrSpiders
 
 
-if __name__ == '__main__':  
+class Spider(PrSpiders):
+
+  retry = False
+  download_delay = 3
+  download_num = 10
+
+  def start_requests(self, **kwargs):
+        start_urls = ['https://www.runoob.com' for i in range(100)]
+        PrSpiders.Requests(url=start_urls, callback=self.parse)
+
+  def parse(self, response):
+        # print(response.text)
+        print(response, response.code, response.url)
+
+
+if __name__ == '__main__':
 
     Spider()
 ```
 
+**4.PrSpiders.Requests 基本配置**
 
-**4.PrSpiders.Requests基本配置**
 > 基本参数：
 > url：请求网址
 > callback：回调函数
 > headers：请求头
 > retry_time：请求失败重试次数
-> method：请求方式（默认Get方法），
+> method：请求方式（默认 Get 方法），
 > meta：回调参数传递
-> encoding：编码格式（默认utf-8）
+> encoding：编码格式（默认 utf-8）
 > retry_interval：重试间隔
-> timeout：请求超时时间（默认10s）
+> timeout：请求超时时间（默认 10s）
 > data or params: 请求参数
-> **kwargs：继承requests的参数如（data, params, proxies）
-
-
+> \*\*kwargs：继承 requests 的参数如（data, params, proxies）
 
 ```python
    PrSpiders.Requests(url=start_urls, headers={}, method='post', encoding='gbk', callback=self.parse,  retry_time=10, retry_interval=0.5, meta={'hhh': 'ggg'})
 ```
 
-
-## *Api*
-
-
+## _Api_
 
 **GET Status Code**
 
-
-
     response.code
-
-
 
 **GET Text**
 
-
     response.text
 
-
-
 **GET Content**
-
-
 
     response.content
 
 **GET Url**
 
-
-
     response.url
-
-
 
 **GET History**
 
-
-
     response.history
-
-
 
 **GET Headers**
 
-
-
     response.headers
-
-
 
 **GET Text Length**
 
-
-
     response.len
-
-
 
 **GET Lxml Xpath**
 
-
-
     response.xpath
 
+## _Xpath Api_
 
-
-## *Xpath Api*
-
- 1. text()方法:将xpath结果转成text
- 2. date()方法:将xpath结果转成date
- 3. get()方法:将xpath结果提取
- 4. getall()方法:将xpath结果全部提取，拥有text()方法和date()方法
+1.  text()方法:将 xpath 结果转成 text
+2.  date()方法:将 xpath 结果转成 date
+3.  get()方法:将 xpath 结果提取
+4.  getall()方法:将 xpath 结果全部提取，拥有 text()方法和 date()方法
 
 ```python
 from PrSpider import PrSpiders
@@ -259,17 +206,6 @@ if __name__ == "__main__":
 
 ```
 
+## 常见问题
 
-
-       
-
-## *Please contact me if there are any bugs*
-
-
-
-
-> email ->
-
-> 1944542244@qq.com
-
-
+### [遇到问题,请提到 issues](https://github.com/peng0928/PrSpiders/issues)
