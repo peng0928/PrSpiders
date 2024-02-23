@@ -100,20 +100,72 @@ if __name__ == '__main__':
     Spider()
 ```
 
-**4.PrSpiders.Requests 基本配置**
+## 配置
 
-> 基本参数：
-> url：请求网址
-> callback：回调函数
-> headers：请求头
-> retry_time：请求失败重试次数
-> method：请求方式（默认 Get 方法），
-> meta：回调参数传递
-> encoding：编码格式（默认 utf-8）
-> retry_interval：重试间隔
-> timeout：请求超时时间（默认 10s）
-> data or params: 请求参数
-> \*\*kwargs：继承 requests 的参数如（data, params, proxies）
+### PrSpiders 默认参数
+
+```设置
+thread_num: Optional[int] = 10  # 线程数
+request_num: Optional[int] = 0  # 请求数
+retry_num: Optional[int] = 0  # 重试数
+success_num: Optional[int] = 0  # 成功请求数
+false_num: Optional[int] = 0  # 失败请求数
+start_urls: Optional[list] = None  # 默认请求起始url
+retry: Optional[bool] = True  # 重试开关，默认开启
+retry_xpath: Optional[str] = None  # 重试开关，默认开启
+download_delay: Optional[int] = 0  # 请求下载周期 默认0s
+download_num: Optional[int] = 5  # 请求下载数量 默认5/次
+logger: Optional[bool or str] = False  # 日志存储开关，默认关闭：可选（bool|文件名）
+log_level: Optional[str] = 'info'  # 日志等级，默认info
+log_stdout: Optional[bool] = False  # 日志控制台重定向，默认关闭
+custom_settings: Optional[dict] = {}  # 通用设置
+session: Optional[bool] = True  # 请求是否开启session;默认开启
+traceback: Optional[bool] = False  # 当程序发生异常时，是否显示堆栈;默认关闭
+log_format: Optional[str] = log_format  # 日志格式 文件utils.log_format
+pipelines: Optional[dict] = None  # 管道(工作目录)
+```
+
+```不建议设置
+work_dir: Optional[str] = os.getcwd()# 工作目录
+executor: Optional[object] = object# 线程池处理器
+pid: Optional[int] = os.getppid()# 程序进程id
+start_time: Optional[int] = time.time()# 开始时间
+futures: Optional[list] = set()# 线程池对象
+Queues: Optional[object] = PriorityQueue()# 优先级队列
+init: Optional[int] = 0# 日志初始化
+deep_func: Optional[list] = []# 深度函数
+Request: Optional[object] = object# 请求对象
+schedule_time: Optional[float] = 0.314# 调度时间
+
+```
+
+### PrSpiders.Requests 请求对象
+
+| 参数                   | 介绍         | 默认值      |
+| ---------------------- | ------------ | ----------- |
+| url                    | 请求网址     | Str or List |
+| callback               | 回调函数     | Object      |
+| headers                | 请求头       | Dict        |
+| retry_time             | 重试次数     | 3(Int)      |
+| method                 | 请求方式     | Get(Str)    |
+| meta                   | 回调参数传递 | {} (Dict)   |
+| encoding               | 编码格式     | utf-8(Str)  |
+| retry_interval         | 重试间隔     | 3 (Int)     |
+| timeout                | 请求超时时间 | 30 (Int)    |
+| data or params or json | 请求参数     | Str or Dict |
+
+**继承 requests 的参数**
+
+| 参数            | 介绍                        | 默认值 |
+| --------------- | --------------------------- | ------ |
+| cookies         | 字典 或 CookieJar 对象      |        |
+| files           | 文件上传                    |        |
+| auth            | 用户认证                    |        |
+| allow_redirects | True 表示允许跟踪           |        |
+| proxies         | 代理                        |        |
+| verify          | True 时将会验证 SSL 证书    |        |
+| stream          | False，将会立即下载响应内容 |        |
+| cert            |                             |        |
 
 ```python
    PrSpiders.Requests(url=start_urls, headers={}, method='post', encoding='gbk', callback=self.parse,  retry_time=10, retry_interval=0.5, meta={'hhh': 'ggg'})
