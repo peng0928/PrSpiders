@@ -1,5 +1,5 @@
 import pymysql
-from .PrSpiders import loguer
+from .log import loguer
 
 
 def ErrorTip(func):

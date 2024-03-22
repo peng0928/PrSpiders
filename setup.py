@@ -3,7 +3,7 @@
 from __future__ import print_function
 from setuptools import setup, find_packages
 
-__version__ = "0.5.2.5"
+__version__ = "2.1.0"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -19,8 +19,10 @@ setup(
     license="MIT",
     url="https://github.com/peng0928/prequests",
     packages=find_packages(),
-    install_requires=["requests", "urllib3", "lxml", "xpinyin", "PrSpiders", 'loguru', 'pymysql'],
-    entry_points={"console_scripts": ["prspiders = pkg.prspider.PrSpider_CMD:main"]},
+    install_requires=["requests", "urllib3", "pickle", "redis",
+                      "PrSpiders", 'loguru', 'pymysql', 'parsel'],
+    entry_points={"console_scripts": [
+        "prspiders = pkg.prspider.PrSpider_CMD:main"]},
     classifiers=[
 
     ],

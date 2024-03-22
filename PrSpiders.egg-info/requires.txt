@@ -1,7 +1,8 @@
 requests
 urllib3
-lxml
-xpinyin
+pickle
+redis
 PrSpiders
 loguru
 pymysql
+parsel
