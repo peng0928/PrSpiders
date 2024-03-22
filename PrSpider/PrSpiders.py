@@ -170,7 +170,8 @@ class PrSpiders(settions):
         pass
 
     def Requests(self, url, headers=None, method="GET", meta=None, retry=True, callback=None, retry_num=3,
-                 encoding="utf-8", retry_time=3, timeout=30, priority=0, wait=False, retry_xpath=None, dont_filter=True,
+                 encoding="utf-8", retry_time=3, timeout=30, priority=0, wait=False, retry_xpath=None,
+                 dont_filter=False,
                  **kwargs):
         if isinstance(url, str):
             query = {
@@ -200,32 +201,35 @@ class PrSpiders(settions):
                     deep = -(settions.deep_func.index(caller_name)) - 1
             query.update(**kwargs)
             item = _IT(deep, query)
-            if self.dont_filter and dont_filter:
-                fingerprint = md5_hash({
-                    "url": url,
-                    "method": method,
-                    "data": kwargs.get("data"),
-                    "json": kwargs.get("json"),
-                })
-                if self.redis:
-                    # redis去重
-                    redis_key = self.redis_key + ':fingerprint'
-                    is_exists = self.redis_serve.sismember(redis_key, fingerprint)
-                    if is_exists:
-                        loguercor.log('DontFilter', f'url already exists: {url}')
-                        self.event.set()
+            if not self.dont_filter:
+                if not dont_filter:
+                    fingerprint = md5_hash({
+                        "url": url,
+                        "method": method,
+                        "data": kwargs.get("data"),
+                        "json": kwargs.get("json"),
+                    })
+                    if self.redis:
+                        # redis去重
+                        redis_key = self.redis_key + ':fingerprint'
+                        is_exists = self.redis_serve.sismember(redis_key, fingerprint)
+                        if is_exists:
+                            loguercor.log('DontFilter', f'url already exists: {url}')
+                            self.event.set()
+                        else:
+                            self.redis_serve.sadd(redis_key, fingerprint)
+                            settions.Queues.put(item)
                     else:
-                        self.redis_serve.sadd(redis_key, fingerprint)
-                        settions.Queues.put(item)
+                        # 本地去重
+                        is_exists = bool(fingerprint in self.filterSet)
+                        if is_exists:
+                            loguercor.log('DontFilter', f'url already exists: {url}')
+                            self.event.set()
+                        else:
+                            self.filterSet.add(fingerprint)
+                            settions.Queues.put(item)
                 else:
-                    # 本地去重
-                    is_exists = bool(fingerprint in self.filterSet)
-                    if is_exists:
-                        loguercor.log('DontFilter', f'url already exists: {url}')
-                        self.event.set()
-                    else:
-                        self.filterSet.add(fingerprint)
-                        settions.Queues.put(item)
+                    settions.Queues.put(item)
             else:
                 settions.Queues.put(item)
         elif isinstance(url, list):

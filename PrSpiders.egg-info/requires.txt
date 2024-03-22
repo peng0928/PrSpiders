@@ -1,6 +1,5 @@
 requests
 urllib3
-pickle
 redis
 PrSpiders
 loguru

@@ -1,11 +1,8 @@
 import os
-import time
 from typing import Optional
 from queue import PriorityQueue
 from .utils import *
-import __main__
 import inspect
-import redis
 
 filter_settions = ['executor', 'pid', 'init']
 
@@ -59,7 +56,7 @@ class settions(defaultSettions):
     custom_settings: Optional[dict] = {}  # 通用设置
     session: Optional[bool] = True  # 请求是否开启session;默认开启
     traceback: Optional[bool] = False  # 当程序发生异常时，是否显示堆栈;默认关闭
-    dont_filter: Optional[bool] = True  # 请求去重, False: 开启去重, Ture: 关闭去重
+    dont_filter: Optional[bool] = False  # 请求去重, False: 开启去重, Ture: 关闭去重
     filterSet: Optional[set] = set()  # 本地去重集合
     log_format: Optional[str] = log_format  # 日志格式 文件utils.log_format
     pipelines: Optional[dict] = {}  # 管道(工作目录)
