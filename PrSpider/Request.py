@@ -22,7 +22,7 @@ from .log import loguercor
 __author__ = "penr"
 
 
-class Request(Xpath):
+class SendRequest(Xpath):
     def __init__(self, Prspider, Request):
         self.retry_num = 0
         self.session = Request

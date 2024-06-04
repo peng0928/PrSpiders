@@ -19,7 +19,7 @@ level_dict = {
     'Yield': {"level": "1", "color": "<yellow>"},
     'Return': {"level": "3", "color": "<yellow>"},
     'Start': {"level": "2", "color": "<yellow>"},
-    'DontFilter': {"level": "2", "color": "<yellow>"},
+    'Filter': {"level": "2", "color": "<yellow>"},
     'Downloader': {"level": "2", "color": "<red>"},
     'Pipelines': {"level": "2", "color": "<red>"},
     'Close': {"level": "1", "color": "<red>"},

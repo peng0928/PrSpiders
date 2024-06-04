@@ -47,12 +47,7 @@ def log_start(self):
     loguercor.log('Pipelines', f'<red>Used Pipelines:\n{pipelines_msg}</red>')
 
 
-import hashlib
-
-
-def md5_hash(item: dict):
+def sha_hash(item: dict):
     string = orjson.dumps(item).decode()
-    md5_hash = hashlib.md5()
-    md5_hash.update(string.encode('utf-8'))
-    hex_dig = md5_hash.hexdigest()
+    hex_dig = hashlib.sha256(str(string).encode()).hexdigest()
     return hex_dig

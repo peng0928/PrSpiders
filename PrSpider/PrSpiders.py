@@ -1,16 +1,19 @@
 import pickle
+import json
 import redis
 import time, os
+import types
 import requests
 import inspect
 import traceback
 import threading
 import multiprocessing
+from typing import Callable, Dict, Union
 from .log import *
 from .utils import *
 from .pipelines import *
 from .pyconn import PrMysql
-from .Request import Request
+from .Request import SendRequest
 from collections.abc import Iterator
 from .settion import _IT, settions, filter_settions
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -33,7 +36,7 @@ class PrSpiders(settions):
     def start_preparation(self):
         """初始化工作"""
         self.start_time = time.time()
-        self.update_settion(self.custom_settings)
+        self.update_settion()
         assert self.thread_num > 0, 'thread_num must be > 0'
         settions.init += 1
         if settions.init <= 1:
@@ -42,7 +45,7 @@ class PrSpiders(settions):
         self.executor = ThreadPoolExecutor(self.thread_num)
         self.Request = requests.session() if self.session else requests
         self.pipelines = dict_sort(self.pipelines)
-        pipelines_msg = str(self.pipelines).replace(',', ',\n')
+        pipelines_msg = json.dumps(self.pipelines, indent=4)  # 使用json.dumps进行字符串格式化
         loguercor.log('Start', Start % (self.thread_num, self.retry, self.pid, self.download_delay, self.download_num,
                                         self.log_level.upper()))
         loguercor.log('Pipelines', f'Used Pipelines:\n{pipelines_msg}')
@@ -50,23 +53,31 @@ class PrSpiders(settions):
         self.cacha_start()
         pipeline_start(self)
 
-    @staticmethod
-    def update_settion(custom_settings):
-        for key, value in custom_settings.items():
-            key = key.lower()
-            if key in filter_settions:
-                continue
-            if isinstance(value, str):
-                if value.isdigit():
-                    value = int(value)
-            setattr(PrSpiders, key, value)
+    def update_settion(self):
+        for name in dir(self):
+            if name.startswith('__'):
+                pass
+            else:
+                val = getattr(self, name)
+                if name in filter_settions or isinstance(val, types.MethodType):
+                    continue
+                setattr(settions, name, val)
+
+        if self.custom_settings:
+            for key, value in self.custom_settings.items():
+                key = key.lower()
+                if key in filter_settions:
+                    continue
+                if isinstance(value, str):
+                    if value.isdigit():
+                        value = int(value)
+                setattr(settions, key, value)
 
     def spider_run(self):
         """
         线程一: 爬虫业务代码（请求入队列）
         线程二: 监听队列
         """
-        self.event = threading.Event()
         self.thread_requests = threading.Thread(target=self.start_call)
         self.thread_queue = threading.Thread(target=self.start_queue)
 
@@ -87,7 +98,7 @@ class PrSpiders(settions):
                 queue_list = []
                 num_to_download = min(self.download_num, qsize)
                 for _ in range(num_to_download):
-                    data = settions.Queues.get().data
+                    data = self.Queues.get().data
                     wait = data.get('wait')
                     queue_list.append(data)
                     del data['wait']
@@ -99,7 +110,6 @@ class PrSpiders(settions):
                         for item in qdata:
                             task = self.executor.submit(self.make_request, **item)
                             self.futures.add(task)
-                            self.event.set()
                 if self.futures:
                     for future in as_completed(self.futures):
                         result = future.result()
@@ -107,11 +117,9 @@ class PrSpiders(settions):
                         result_class_name = result.__class__.__name__
                         if isinstance(result, Iterator) and result_class_name != 'None':
                             try:
-
                                 for item in result:
                                     self.loging.yie(item)
                                     pipeline_process_item(item, self)
-
                             except Exception as e:
                                 self.trace(e)
                         else:
@@ -124,6 +132,7 @@ class PrSpiders(settions):
                     pass
                 else:
                     break
+            time.sleep(self.download_delay)
 
     def trace(self, worker_exception, msg=""):
         formatted_traceback = traceback.format_exception(type(worker_exception),
@@ -143,7 +152,7 @@ class PrSpiders(settions):
 
     def start(self, *args, **kwargs):
         self.start_requests(*args, **kwargs)
-        self.event.wait()
+        settions.event.wait()
         while True:
             if not self.futures and self.Queues.empty():
                 break
@@ -162,83 +171,12 @@ class PrSpiders(settions):
             raise AttributeError("Crawling could not start: 'start_urls' not found ")
         if isinstance(self.start_urls, list):
             for url in self.start_urls:
-                self.Requests(url=url, callback=self.parse)
+                Requests(url=url, callback=self.parse)
         else:
-            self.Requests(url=self.start_urls, callback=self.parse)
+            Requests(url=self.start_urls, callback=self.parse)
 
     def parse(self, response):
         pass
-
-    def Requests(self, url, headers=None, method="GET", meta=None, retry=True, callback=None, retry_num=3,
-                 encoding="utf-8", retry_time=3, timeout=30, priority=0, wait=False, retry_xpath=None,
-                 dont_filter=False,
-                 **kwargs):
-        if isinstance(url, str):
-            query = {
-                "url": url,
-                "headers": headers,
-                "method": method,
-                "meta": meta,
-                "retry": retry,
-                "callback": callback,
-                "retry_num": retry_num,
-                "encoding": encoding,
-                "retry_time": retry_time,
-                "timeout": timeout,
-                "wait": wait,
-                "retry_xpath": retry_xpath,
-            }
-            frame = inspect.currentframe().f_back
-            caller_name = frame.f_code.co_name
-            if caller_name == 'start_requests':
-                deep = priority
-            else:
-                if priority != 0:
-                    deep = priority
-                else:
-                    if caller_name not in settions.deep_func:
-                        settions.deep_func.append(caller_name)
-                    deep = -(settions.deep_func.index(caller_name)) - 1
-            query.update(**kwargs)
-            item = _IT(deep, query)
-            if not self.dont_filter:
-                if not dont_filter:
-                    fingerprint = md5_hash({
-                        "url": url,
-                        "method": method,
-                        "data": kwargs.get("data"),
-                        "json": kwargs.get("json"),
-                    })
-                    if self.redis:
-                        # redis去重
-                        redis_key = self.redis_key + ':fingerprint'
-                        is_exists = self.redis_serve.sismember(redis_key, fingerprint)
-                        if is_exists:
-                            loguercor.log('DontFilter', f'url already exists: {url}')
-                            self.event.set()
-                        else:
-                            self.redis_serve.sadd(redis_key, fingerprint)
-                            settions.Queues.put(item)
-                    else:
-                        # 本地去重
-                        is_exists = bool(fingerprint in self.filterSet)
-                        if is_exists:
-                            loguercor.log('DontFilter', f'url already exists: {url}')
-                            self.event.set()
-                        else:
-                            self.filterSet.add(fingerprint)
-                            settions.Queues.put(item)
-                else:
-                    settions.Queues.put(item)
-            else:
-                settions.Queues.put(item)
-        elif isinstance(url, list):
-            for url in url:
-                self.Requests(url, headers=headers, method=method, meta=meta, retry=retry, callback=callback,
-                              retry_num=retry_num, encoding=encoding, retry_time=retry_time, timeout=timeout,
-                              priority=priority, retry_xpath=retry_xpath, wait=wait, dont_filter=dont_filter, **kwargs)
-        else:
-            raise TypeError("url must be str or list")
 
     def make_request(self, url, callback, headers=None, retry_num=3, method="GET", meta=None, retry=True,
                      encoding="utf-8", retry_time=3, timeout=30, **kwargs):
@@ -247,7 +185,7 @@ class PrSpiders(settions):
             response = self.download(url=url, headers=headers, retry_time=retry_num, method=method,
                                      meta=meta, retry=retry, encoding=encoding, retry_interval=retry_time,
                                      timeout=timeout, settion=settions, **kwargs)
-            self.loging.crawl(f"Response ({response.code}) <{method.upper()} {url}>")
+            self.loging.crawl(f"Response ({response.code}) <{method.upper()} {response.url}>")
             self.retry_num += int(response.meta.get("retry_num"))
             if response and response.ok:
                 self.success_num += 1
@@ -258,7 +196,7 @@ class PrSpiders(settions):
             self.trace(e)
 
     def download(self, **kwargs):
-        response = Request(self, self.Request).get(**kwargs)
+        response = SendRequest(self, self.Request).get(**kwargs)
         return response
 
     def error(self, response):
@@ -295,20 +233,152 @@ class PrSpiders(settions):
         except ZeroDivisionError:
             average_time = 0
         data = [
-            ('Thread Num', self.thread_num),
-            ('Download Delay', self.download_delay),
-            ('Download Num', self.download_num),
-            ('Request Num', self.request_num),
-            ('Success Num', self.success_num),
-            ('False Num', self.false_num),
-            ('Retry Num', self.retry_num),
-            ('Spend Time', '%.3fs' % spend_time),
-            ('Average Time', '%.3fs' % average_time),
-            ('Start Time', self.process_timestamp(self.start_time)),
-            ('End Time', self.process_timestamp(end_time)),
+            ('dont_filter', self.dont_filter),
+            ('thread_num', self.thread_num),
+            ('download_delay', self.download_delay),
+            ('download_num', self.download_num),
+            ('request_num', self.request_num),
+            ('success_num', self.success_num),
+            ('false_num', self.false_num),
+            ('retry_num', self.retry_num),
+            ('spend_time', '%.3fs' % spend_time),
+            ('average_time', '%.3fs' % average_time),
+            ('start_time', self.process_timestamp(self.start_time)),
+            ('end_time', self.process_timestamp(end_time)),
+            ('work_dir', self.work_dir),
+            ('pipelines', self.pipelines),
         ]
         m = close_sign(data)
         loguercor.log('Close', m)
+
+
+class Requests:
+    def __init__(self,
+                 url: Union[str, list],
+                 headers: dict = None,
+                 method: str = "GET",
+                 meta: dict = None,
+                 retry: bool = True,
+                 callback: Callable = None,
+                 retry_num: int = 3,
+                 encoding: str = "utf-8",
+                 retry_time: int = 3,
+                 timeout: int = 30,
+                 priority: int = 0,
+                 wait: bool = False,
+                 retry_xpath: str = None,
+                 dont_filter: bool = False,
+                 **kwargs) -> None:
+
+        self.send_to_queues(
+            url=url,
+            headers=headers,
+            method=method,
+            meta=meta,
+            retry=retry,
+            callback=callback,
+            retry_num=retry_num,
+            encoding=encoding,
+            retry_time=retry_time,
+            timeout=timeout,
+            priority=priority,
+            wait=wait,
+            retry_xpath=retry_xpath,
+            dont_filter=dont_filter,
+            **kwargs
+        )
+
+    def send_to_queues(self, url: Union[str, list], headers: dict = None, method: str = "GET", meta: dict = None,
+                       retry: bool = True, callback: Callable = None, retry_num: int = 3, encoding: str = "utf-8",
+                       retry_time: int = 3, timeout: int = 30, priority: int = 0, wait: bool = False,
+                       retry_xpath: str = None, dont_filter: bool = False, **kwargs) -> None:
+
+        if not isinstance(url, (str, list)):
+            raise TypeError("url must be a string or list of strings")
+
+        if isinstance(url, str):
+            query = {
+                "url": url,
+                "headers": headers,
+                "method": method,
+                "meta": meta,
+                "retry": retry,
+                "callback": callback,
+                "retry_num": retry_num,
+                "encoding": encoding,
+                "retry_time": retry_time,
+                "timeout": timeout,
+                "wait": wait,
+                "retry_xpath": retry_xpath,
+            }
+            frame = inspect.currentframe().f_back
+            caller_name = frame.f_code.co_name
+            deep = self._calculate_priority(caller_name, priority)
+            query.update(**kwargs)
+            item = self._create_item(deep, query)
+            if not self._should_filter(item, dont_filter):
+                self._add_to_queue(item)
+            else:
+                settions.event.set()
+        elif isinstance(url, list):
+            for u in url:
+                self.send_to_queues(u, headers=headers, method=method, meta=meta, retry=retry, callback=callback,
+                                    retry_num=retry_num, encoding=encoding, retry_time=retry_time, timeout=timeout,
+                                    priority=priority, retry_xpath=retry_xpath, wait=wait, dont_filter=dont_filter,
+                                    **kwargs)
+
+    def _calculate_priority(self, caller_name: str, priority: int) -> int:
+        if caller_name == 'send_to_queues':
+            return priority
+        else:
+            if priority != 0:
+                return priority
+            else:
+                deep_func = getattr(settions, "deep_func", [])
+                if caller_name not in deep_func:
+                    deep_func.append(caller_name)
+                return -(deep_func.index(caller_name)) - 1
+
+    def _create_item(self, deep: int, query: dict) -> '_IT':
+        # Assume _IT is a predefined class for item structure.
+        return _IT(deep, query)
+
+    def _should_filter(self, item: '_IT', dont_filter: bool) -> bool:
+        if settions.dont_filter is False:
+            if not dont_filter:
+                fingerprint = self._calculate_fingerprint(item)
+                if self._is_duplicate(fingerprint):
+                    loguercor.log('Filter', f'url already exists: {item.data["url"]}')
+                    return True
+        return False
+
+    def _calculate_fingerprint(self, query: dict) -> str:
+        # Use SHA-256 for better security
+        query = query.data
+        data = {
+            "url": query["url"],
+            "method": query["method"],
+            "params": query.get("params"),
+        }
+        return sha_hash(data)
+
+    def _is_duplicate(self, fingerprint: str) -> bool:
+        # Simplify the logic for duplicate check
+        if settions.redis:
+            redis_key = f"{settions.redis.get('redis_key')}:fingerprint"
+            if settions.redis_serve.sismember(redis_key, fingerprint):
+                return True
+            else:
+                settions.redis_serve.sadd(redis_key, fingerprint)
+        else:
+            if fingerprint not in settions.filterSet:
+                settions.filterSet.add(fingerprint)
+            else:
+                return True
+
+    def _add_to_queue(self, item: '_IT') -> None:
+        settions.Queues.put(item)
+        settions.event.set()
 
 
 class RedisSpider(PrSpiders):
@@ -316,16 +386,14 @@ class RedisSpider(PrSpiders):
     dont_filter = False
 
     def open(self):
-        self.update_settion(self.custom_settings)
         self.redis_key = self.redis.get('redis_key', None)
         self.redis_url = self.redis.get('redis_url')
         assert self.redis_key, "redis_key is not None"
         assert self.redis_url, "redis_url is not None"
         redis_conn_pool = redis.ConnectionPool.from_url(self.redis_url, decode_responses=True)
         self.redis_serve = redis.Redis(connection_pool=redis_conn_pool)
-        setattr(PrSpiders, 'redis_serve', self.redis_serve)
-        setattr(PrSpiders, 'redis_key', self.redis_key)
         self.loging.info(f"RedisKey: {self.redis_key}")
+        self.update_settion()
 
     def get_data(self):
         for _ in range(self.download_num):
